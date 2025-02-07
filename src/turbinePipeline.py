@@ -6,10 +6,41 @@ from pyspark.sql import functions as F
 from pyspark.sql import DataFrame
 from pyspark.sql.utils import AnalysisException
 
-# Define Delta Lake storage paths in Databricks File System (DBFS)
-BRONZE_PATH = "dbfs:/mnt/bronze/wind_turbine_data"
-SILVER_PATH = "dbfs:/mnt/silver/wind_turbine_data"
-GOLD_PATH = "dbfs:/mnt/gold/wind_turbine_summary"
+# Define ADLS Gen2 Storage Variables
+STORAGE_ACCOUNT_NAME = "your_adls_account"
+CONTAINER_NAME = "your_container"
+MOUNT_NAME = "your_mount_name"
+
+# Define ADLS Paths
+BRONZE_PATH = f"dbfs:/mnt/{MOUNT_NAME}/bronze/wind_turbine_data"
+SILVER_PATH = f"dbfs:/mnt/{MOUNT_NAME}/silver/wind_turbine_data"
+GOLD_PATH = f"dbfs:/mnt/{MOUNT_NAME}/gold/wind_turbine_summary"
+
+# Define Checkpoint Paths for Streaming
+CHECKPOINT_SILVER = f"dbfs:/mnt/{MOUNT_NAME}/checkpoints/silver"
+CHECKPOINT_GOLD = f"dbfs:/mnt/{MOUNT_NAME}/checkpoints/gold"
+
+# Mount ADLS Gen2 Storage
+def mount_adls():
+    """Mounts Azure Data Lake Storage (ADLS Gen2) to Databricks."""
+    configs = {
+        "fs.azure.account.auth.type": "OAuth",
+        "fs.azure.account.oauth.provider.type": "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider",
+        "fs.azure.account.oauth2.client.id": "your_client_id",
+        "fs.azure.account.oauth2.client.secret": "your_client_secret",
+        "fs.azure.account.oauth2.client.endpoint": f"https://login.microsoftonline.com/your_tenant_id/oauth2/token"
+    }
+
+    try:
+        dbutils.fs.mount(
+            source=f"abfss://{CONTAINER_NAME}@{STORAGE_ACCOUNT_NAME}.dfs.core.windows.net/",
+            mount_point=f"/mnt/{MOUNT_NAME}",
+            extra_configs=configs
+        )
+        print(f"ADLS mounted successfully at `/mnt/{MOUNT_NAME}`")
+    except Exception as e:
+        print(f"ADLS Mount Failed: {e}")
+
 
 # Initialize Spark Session (Databricks auto-initializes Spark)
 spark = SparkSession.builder.appName("WindTurbineProcessing").config("spark.sql.extensions",
