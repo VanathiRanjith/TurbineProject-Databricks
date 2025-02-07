@@ -117,10 +117,12 @@ def detect_anomalies(df: DataFrame) -> DataFrame:
 
     return df
 
-
 def write_to_silver_layer(df: DataFrame):
     """Writes the cleaned DataFrame to the Silver Layer in Delta format."""
-    df.write.format("delta").mode("overwrite").save(SILVER_PATH)
+    df.writeStream.format("delta") \
+        .option("checkpointLocation", CHECKPOINT_SILVER) \
+        .outputMode("append") \
+        .start(SILVER_PATH)
     print(f"Cleaned data successfully written to Silver Layer (Delta): {SILVER_PATH}")
 
 
