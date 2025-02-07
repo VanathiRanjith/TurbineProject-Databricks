@@ -16,9 +16,6 @@ BRONZE_PATH = f"dbfs:/mnt/{MOUNT_NAME}/bronze/wind_turbine_data"
 SILVER_PATH = f"dbfs:/mnt/{MOUNT_NAME}/silver/wind_turbine_data"
 GOLD_PATH = f"dbfs:/mnt/{MOUNT_NAME}/gold/wind_turbine_summary"
 
-# Define Checkpoint Paths for Streaming
-CHECKPOINT_SILVER = f"dbfs:/mnt/{MOUNT_NAME}/checkpoints/silver"
-CHECKPOINT_GOLD = f"dbfs:/mnt/{MOUNT_NAME}/checkpoints/gold"
 
 # Mount ADLS Gen2 Storage
 def mount_adls():
@@ -49,13 +46,9 @@ spark = SparkSession.builder.appName("WindTurbineProcessing").config("spark.sql.
 
 
 def read_bronze_layer() -> DataFrame:
-    """Reads raw data from the Bronze Layer using Databricks AutoLoader."""
+    """Reads raw CSV data from the Bronze Layer in DBFS."""
     try:
-        return spark.readStream.format("cloudFiles") \
-            .option("cloudFiles.format", "csv") \
-            .option("header", "true") \
-            .option("inferSchema", "true") \
-            .load(BRONZE_PATH)
+        return spark.read.format("csv").option("header", "true").option("inferSchema", "true").load(f"{BRONZE_PATH}/*.csv")
     except AnalysisException as e:
         print(f"Error reading data from Bronze Layer: {e}")
         return None
@@ -119,10 +112,7 @@ def detect_anomalies(df: DataFrame) -> DataFrame:
 
 def write_to_silver_layer(df: DataFrame):
     """Writes the cleaned DataFrame to the Silver Layer in Delta format."""
-    df.writeStream.format("delta") \
-        .option("checkpointLocation", CHECKPOINT_SILVER) \
-        .outputMode("append") \
-        .start(SILVER_PATH)
+    df.write.format("delta").mode("overwrite").save(SILVER_PATH)
     print(f"Cleaned data successfully written to Silver Layer (Delta): {SILVER_PATH}")
 
 
