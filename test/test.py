@@ -1,4 +1,4 @@
-# Databricks-compatible test script for WindTurbinePipeline
+# Test script for WindTurbinePipeline
 
 # Import required libraries
 import pytest
