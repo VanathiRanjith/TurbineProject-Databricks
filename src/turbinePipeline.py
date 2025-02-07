@@ -18,10 +18,13 @@ spark = SparkSession.builder.appName("WindTurbineProcessing").config("spark.sql.
 
 
 def read_bronze_layer() -> DataFrame:
-    """Reads raw CSV data from the Bronze Layer in DBFS."""
+    """Reads raw data from the Bronze Layer using Databricks AutoLoader."""
     try:
-        return spark.read.format("csv").option("header", "true").option("inferSchema", "true").load(
-            f"{BRONZE_PATH}/*.csv")
+        return spark.readStream.format("cloudFiles") \
+            .option("cloudFiles.format", "csv") \
+            .option("header", "true") \
+            .option("inferSchema", "true") \
+            .load(BRONZE_PATH)
     except AnalysisException as e:
         print(f"Error reading data from Bronze Layer: {e}")
         return None
