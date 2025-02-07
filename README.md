@@ -18,15 +18,15 @@ Writes the cleaned data to the Silver layer in Parquet format.
 Stores the summary statistics in the Gold layer.
 
 # Code Structure
-1. import required libraries
-2. define Delta Lake storage paths in Databricks File System (DBFS) and initialize Spark Session (Databricks auto-initializes Spark)
-3. read_bronze: Reads raw data from the Bronze layer.
-4. imputed_missing_value: Handles missing values in the DataFrame.
-5. detect_outliers: Detects outliers in the dataset.
-6. detect_anomalies: Identifies anomalies based on power output deviations.
-7. write_to_silver_layer: Writes the cleaned data to the Silver layer.
-8. summary_statistics: Calculates and writes summary statistics to the Gold layer.
-9. process_turbine: Orchestrates the entire data processing pipeline.
+1. Import required libraries
+2. Define Delta Lake storage paths in Databricks File System (DBFS) and initialize Spark Session (Databricks auto-initializes Spark)
+3. Read_bronze: Reads raw data from the Bronze layer.
+4. Imputed_missing_value: Handles missing values in the DataFrame.
+5. Detect_outliers: Detects outliers in the dataset.
+6. Detect_anomalies: Identifies anomalies based on power output deviations.
+7. Write_to_silver_layer: Writes the cleaned data to the Silver layer.
+8. Summary_statistics: Calculates and writes summary statistics to the Gold layer.
+9. Process_turbine: Orchestrates the entire data processing pipeline.
 
 # Testing
 1. Data cleaning operations (missing value imputation and outlier detection).
